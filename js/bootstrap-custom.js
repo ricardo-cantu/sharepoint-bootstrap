@@ -11,14 +11,67 @@
 
         this.mutationObserver = window.MutationObserver || window.WebKitMutationObserver;
         this.eventListenerSupported = window.addEventListener;
+
+        // Cache the zones
+        this.$msWebpartZone = $('.ms-webpart-zone');
     }
 
     component.prototype = function () {
 
+        // Init all Bootstrap helpers
+        //
+        // Public
+        //
+        function init() {
+
+            var self = this;
+
+            _fixDropZone.call(self);
+            _bindBrowserStyles.call(self);
+            _bindTopNav.call(self);
+            _bindBodySpans.call(self);
+        }
+
+        // Fix Drop Zone Div
+        //
+        // Private
+        //
+        function _fixDropZone() {
+
+            var self = this;
+
+            if (self.mutationObserver) {
+
+                self.$msWebpartZone.each(function () {
+                    var observer = new MutationObserver(function (mutations, observer) {
+                        _moveDropZone(mutations);
+                    });
+
+                    observer.observe(this, {
+                        subtree: true,
+                        childList: true,
+                        attributes: false
+                    });
+                });
+            }
+            else {
+                self.$msWebpartZone.on("DOMSubtreeModified", _moveDropZone);
+            }
+        }
+
+        function _moveDropZone(obj) {
+            var target = obj.target || obj.srcTarget || obj[0].target;
+
+            $('#ms-dnd-dropbox').css({
+                left: 0,
+                top: 0
+            })
+        }
+
         // Ensure that main content is at 12 columns when there is no side navigation
         // ie: Design Manager page
 
-        function BindBodySpans() {
+        function _bindBodySpans() {
             var $sideNavBox = $('#sideNavBox'),
                 $sideNavBoxMsCoreNavigation;
 
@@ -86,7 +139,7 @@
 
         // Make top navigation responsive / touch friendly
         // Replaces the hover event for element that have dynamic children
-        function BindTopNav() {
+        function _bindTopNav() {
 
             // grab top nav SP generated list
             var u = $('[data-role=navigation] ul.root');
@@ -150,7 +203,7 @@
 
 
         // specific browsers may require specific fixes
-        function BindBrowserStyles() {
+        function _bindBrowserStyles() {
 
             // IE 10 mobile issue with -ms-viewport (Thanks to starnell (https://www.codeplex.com/site/users/view/starnell) for the fix)
             if (("-ms-user-select" in document.documentElement.style) && (navigator.userAgent.match(/IEMobile\/10\.0/))) {
@@ -161,9 +214,7 @@
         }
 
         return {
-            BindTopNav: BindTopNav,
-            BindBrowserStyles: BindBrowserStyles,
-            BindBodySpans: BindBodySpans,
+            init: init,
         };
     }();
 
@@ -174,10 +225,7 @@
 
         window.SPBS = new component();
 
-        SPBS.BindBrowserStyles();
-        SPBS.BindTopNav();
-        SPBS.BindBodySpans();
-
+        SPBS.init();
     });
 
 })(window, jQuery);
