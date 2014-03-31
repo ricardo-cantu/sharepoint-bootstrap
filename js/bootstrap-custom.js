@@ -30,6 +30,7 @@
             _bindBrowserStyles.call(self);
             _bindTopNav.call(self);
             _bindBodySpans.call(self);
+            _overrideTwitter.call(self);
         }
 
         // Fix Drop Zone Div
@@ -211,6 +212,75 @@
                 msViewportStyle.appendChild(document.createTextNode("@-ms-viewport{width:auto!important}"));
                 document.getElementsByTagName("head")[0].appendChild(msViewportStyle);
             }
+        }
+
+        function _overrideTwitter() {
+
+            $.fn.carousel.Constructor.prototype.slide = function (type, next) {
+                var $active = this.$element.find('.item.active')
+                var $next = next || $active[type]()
+                var isCycling = this.interval
+                var direction = type == 'next' ? 'left' : 'right'
+                var fallback = type == 'next' ? 'first' : 'last'
+                var that = this
+
+                if (!$next.length) {
+                    if (!this.options.wrap) return
+                    $next = this.$element.find('.item')[fallback]()
+                }
+
+                if ($next.hasClass('active')) return this.sliding = false
+
+                var e = $.Event('slide.bs.carousel', { relatedTarget: $next[0], direction: direction })
+                this.$element.trigger(e)
+                if (e.isDefaultPrevented()) return
+
+                this.sliding = true
+
+                isCycling && this.pause()
+
+                if (this.$indicators.length) {
+                    this.$indicators.find('.active').removeClass('active')
+                    this.$element.one('slid.bs.carousel', function () {
+                        var $nextIndicator = $(that.$indicators.children()[that.getActiveIndex()])
+                        $nextIndicator && $nextIndicator.addClass('active')
+                    })
+                }
+
+                if ($.support.transition && this.$element.hasClass('slide')) {
+                    $next.addClass(type)
+                    $next[0].offsetWidth // force reflow
+                    $active.addClass(direction)
+                    $next.addClass(direction)
+                    $active
+                      .one($.support.transition.end, function () {
+                          $next.removeClass([type, direction].join(' ')).addClass('active')
+                          $active.removeClass(['active', direction].join(' '))
+                          that.sliding = false
+                          setTimeout(function () { that.$element.trigger('slid.bs.carousel') }, 0)
+                      })
+                      .emulateTransitionEnd($active.css('transition-duration').slice(0, -1) * 1000)
+                } else if (this.$element.hasClass('slide')) {
+                    $active.animate({ left: (direction == 'right' ? '100%' : '-100%') }, 600, function () {
+                        $active.removeClass('active')
+                        that.sliding = false
+                        setTimeout(function () { that.$element.trigger('slid.bs.carousel') }, 0)
+                    })
+                    $next.addClass(type).css({ left: (direction == 'right' ? '-100%' : '100%') }).animate({ left: 0 }, 600, function () {
+                        $next.removeClass(type).addClass('active')
+                    })
+                } else {
+                    $active.removeClass('active')
+                    $next.addClass('active')
+                    this.sliding = false
+                    this.$element.trigger('slid.bs.carousel')
+                }
+
+                isCycling && this.cycle()
+
+                return this
+            }
+
         }
 
         return {
