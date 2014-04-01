@@ -9,6 +9,7 @@ Twitter Bootstrap 3.1.1 adapted to work in SharePoint 2013/ Office 365
 
  - [Quick start](#quick-start)
  - [Features](#features)
+ - [Acknowledgement](#acknowledgement)
 
 
 ## Quick start
@@ -23,5 +24,10 @@ Twitter Bootstrap 3.1.1 adapted to work in SharePoint 2013/ Office 365
 ## Features
 
 Carousel - Supports animation in IE9. Bootstrap has dropped support for animation in older browsers like IE9. 
+
+## Acknowledgement
+
+Inspired by and based on the wonderful work by Eric Overfield and all the contributors
+at the [Responsive SharePoint Codeplex project](https://responsivesharepoint.codeplex.com/).
 
 
