@@ -26,11 +26,30 @@
 
             var self = this;
 
+            _triggerSpecialEvents.call(self);
             _fixDropZone.call(self);
             _bindBrowserStyles.call(self);
             _bindTopNav.call(self);
             _bindBodySpans.call(self);
             _overrideTwitter.call(self);
+        }
+
+        function _triggerSpecialEvents() {
+            // Hook into SP window resize event
+            if (typeof window.oldFixRibbonAndWorkspaceDimensions === 'undefined' && typeof FixRibbonAndWorkspaceDimensions !== 'undefined') {
+
+                window.oldFixRibbonAndWorkspaceDimensions = FixRibbonAndWorkspaceDimensions;
+
+                FixRibbonAndWorkspaceDimensions = function () {
+
+                    var rtn = window.oldFixRibbonAndWorkspaceDimensions.apply(arguments);
+
+                    // Trigger custom event we will listen for
+                    jQuery(document).trigger('FixRibbonAndWorkspaceDimensions');
+
+                    return rtn;
+                };
+            }
         }
 
         // Fix Drop Zone Div
@@ -216,6 +235,11 @@
 
         function _overrideTwitter() {
 
+            var $s4workspace = $('#s4-workspace'),
+                $s4bodyContainer = $('#s4-bodyContainer'),
+                $msDesignerRibbon = $('#ms-designer-ribbon'),
+                Affix = {};
+
             $.fn.carousel.Constructor.prototype.slide = function (type, next) {
                 var $active = this.$element.find('.item.active')
                 var $next = next || $active[type]()
@@ -280,6 +304,96 @@
 
                 return this
             }
+
+            //
+            // Override the checkpostion/getPinnedOffset method for the affix plugin.
+            // SharePoint uses a custom scroll bar that is not part
+            // of the native scrolling ui. This adds support for
+            // checking the position of the custom scroll bar.
+            //
+            // This is Twitter BS Code modified
+
+            Affix.RESET = 'affix affix-top affix-bottom'
+            $.fn.affix.Constructor.prototype.getPinnedOffset = function () {
+                if (this.pinnedOffset) return this.pinnedOffset
+
+                var e = $.Event('affix.bs.affix') // SharePoint
+                this.$element.removeClass(Affix.RESET).addClass('affix').trigger(e) // SharePoint
+
+                // SharePoint
+                if (typeof $s4workspace != undefined) {
+                    var scrollTop = $s4workspace.scrollTop();
+                    var position = { top: this.$element.offset().top + scrollTop };
+                }
+                else {
+                    var scrollTop = this.$window.scrollTop()
+                    var position = this.$element.offset()
+                }
+                return (this.pinnedOffset = position.top - scrollTop)
+            }
+            $.fn.affix.Constructor.prototype.checkPosition = function () {
+                if (!this.$element.is(':visible')) return
+
+                var scrollHeight = $(document).height()
+                var scrollTop = this.$window.scrollTop()
+                var position = this.$element.offset()
+                var offset = this.options.offset
+                var offsetTop = offset.top
+                var offsetBottom = offset.bottom
+                var self = this; //sharepoint
+
+                // SharePoint
+                if (typeof $s4workspace != undefined) {
+                    scrollTop = $s4workspace.scrollTop();
+                    scrollHeight = $s4bodyContainer.height()
+                    position.top += scrollTop;
+                }
+
+                if (typeof offset != 'object') offsetBottom = offsetTop = offset
+                if (typeof offsetTop == 'function') offsetTop = offset.top(this.$element)
+                if (typeof offsetBottom == 'function') offsetBottom = offset.bottom(this.$element)
+
+                // SharePoint
+                if (typeof $s4workspace != undefined) {
+                    offsetTop += $msDesignerRibbon.height() + parseInt($msDesignerRibbon.css('margin-top'), 10);
+                }
+
+                var affix = this.unpin != null && (scrollTop + this.unpin <= position.top) ? false :
+                            offsetBottom != null && (position.top + this.$element.height() + this.unpin >= scrollHeight - offsetBottom) ? 'bottom' :
+                            offsetTop != null && (scrollTop <= offsetTop) ? 'top' : false
+
+                if (this.affixed === affix) return
+                if (this.unpin != null) this.$element.css('top', '')
+
+                var affixType = 'affix' + (affix ? '-' + affix : '')
+                var e = $.Event(affixType + '.bs.affix')
+
+                this.$element.trigger(e)
+
+                if (e.isDefaultPrevented()) return
+
+                this.affixed = affix
+                this.unpin = affix == 'bottom' ? this.getPinnedOffset() : null
+
+                this.$element
+                  .removeClass(Affix.RESET)
+                  .addClass(affixType)
+                  .trigger($.Event(affixType.replace('affix', 'affixed')))
+
+                if (affix == 'bottom') {
+                    setTimeout(function () {
+                        self.$element.offset({ top: offsetBottom - (self.$element.outerHeight(true) + self.unpin + 14) })
+                    }, 0);
+                }
+            };
+
+            // Trigger a window scroll event on the workspace scroll
+            $s4workspace.on('scroll', function (e) {
+                $(window).triggerHandler("scroll.bs.affix.data-api");
+            });
+            $(document).on('FixRibbonAndWorkspaceDimensions', function (e) {
+                $(window).triggerHandler("scroll.bs.affix.data-api");
+            });
 
         }
 

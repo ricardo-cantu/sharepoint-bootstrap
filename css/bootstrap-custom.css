@@ -1,10 +1,17 @@
-﻿/*bootstrap 3 resets for SharePoint*/
+﻿/* bootstrap 3 resets for SharePoint */
 
-/* Set back sharepoint look*/
+/* Set back some sharepoint look */
 .ms-dlg-heading, h2.ms-dlg-heading {
     line-height: normal;
     margin: auto;
     font-weight: normal;
+}
+a:hover, a:focus {
+    text-decoration: none;
+}
+input[type="radio"] {
+    margin: 3px 3px 0px 5px;
+    padding: initial;
 }
 
 /*border-box causes many issues with SP*/
@@ -49,7 +56,7 @@ span[class^="ms-"] > img {
 
 .ms-siteactions-imgspan {
     float: none;
-    margin: 0px;
+    margin: 0;
 }
 
 input.ms-cui-cb-input {
@@ -64,12 +71,12 @@ select, input[type="file"] {
 
 label {
     display: inline-block;
-    margin-bottom: 0px;
+    margin-bottom: 0;
     font-weight: normal;
 }
 
 .navbar-toggle {
-    min-width: 0px;
+    min-width: 0;
 }
 
 a:focus {
@@ -86,7 +93,7 @@ button::-moz-focus-inner {
     background-color: transparent;
     border: 1px transparent none;
     color: inherit;
-    margin: 0px auto;
+    margin: 0 auto;
     width: auto;
 }
 /*end SP resets*/
@@ -118,7 +125,7 @@ button::-moz-focus-inner {
 }
 
 #pageStatusBar[class], .ms-status-msg {
-    margin-bottom: 0px;
+    margin-bottom: 0;
 }
 
 #suiteBarLeft {
@@ -154,18 +161,18 @@ button::-moz-focus-inner {
 }
 
 #pageTitle {
-    margin: 0px 0px 5px;
+    margin: 0 0 5px;
     font-size: 2em;
 }
 /* breadcrumb*/
 ul.s4-breadcrumb {
     margin-bottom: 5px;
-    padding: 0px;
+    padding: 0;
 }
 
     ul.s4-breadcrumb, ul.s4-breadcrumb ul {
-        margin: 0px 0px 5px;
-        padding: 0px;
+        margin: 0 0 5px;
+        padding: 0;
         list-style: none inside none;
         display: inline-block;
     }
@@ -254,7 +261,7 @@ ul.s4-breadcrumb {
     position: relative;
 }
 
-/*images within nav should not use respponsive properties*/
+/*images within nav should not use responsive properties*/
 .nav .ms-core-navigation img {
     max-width: none;
 }
@@ -307,8 +314,8 @@ ul.s4-breadcrumb {
     min-height: 1px;
     padding-left: 15px;
     padding-right: 15px;
-    margin-left: 0px;
-    margin-right: 0px;
+    margin-left: 0;
+    margin-right: 0;
     width: auto;
 }
 /*end left nav */
@@ -320,7 +327,7 @@ ul.s4-breadcrumb {
 }
 
 div.table {
-    margin: 0px; /*added by design manager admin page, ruins rd layout*/
+    margin: 0; /*added by design manager admin page, ruins rd layout*/
 }
 
 * [class*="col-"] .ms-table {
@@ -377,7 +384,7 @@ a.ms-storefront-selectanchor, a.ms-storefront-selectanchor:link, a.ms-storefront
 /*end edit mode table fixes*/
 
 .ms-ToolPaneBody select, .ms-ToolPaneBody textarea, .ms-ToolPaneBody input[type="text"], .ms-ToolPaneBody input[type="password"], .ms-ToolPaneBody input[type="datetime"], .ms-ToolPaneBody input[type="datetime-local"], .ms-ToolPaneBody input[type="date"], .ms-ToolPaneBody input[type="month"], .ms-ToolPaneBody input[type="time"], .ms-ToolPaneBody input[type="week"], .ms-ToolPaneBody input[type="number"], .ms-ToolPaneBody input[type="email"], .ms-ToolPaneBody input[type="url"], .ms-ToolPaneBody input[type="search"], .ms-ToolPaneBody input[type="tel"], .ms-ToolPaneBody input[type="color"], .ms-ToolPaneBody .uneditable-input {
-    margin-bottom: 0px;
+    margin-bottom: 0;
     width: auto;
     height: auto;
     line-height: 20px;
@@ -385,7 +392,7 @@ a.ms-storefront-selectanchor, a.ms-storefront-selectanchor:link, a.ms-storefront
 
 .ms-ToolPaneBody label {
     display: inline-block;
-    margin-bottom: 0px;
+    margin-bottom: 0;
 }
 /*end web part properties*/
 
@@ -415,7 +422,7 @@ ul.three-up {
 /*Fullscreen*/
 .ms-fullscreenmode #DeltaPlaceHolderMain,
 .b3-fullscreenmode #DeltaPlaceHolderMain {
-    margin-left: 0px;
+    margin-left: 0;
     width: 100%;
 }
 
@@ -424,6 +431,13 @@ ul.three-up {
     display: none;
 }
 /*end template styles */
+
+
+/* The cell where you can add a user or group has no proper width. */
+.ms-core-form-section .ms-table {
+    display: table;
+}
+
 
 /*responsive*/
 @media (min-width: 768px) {
@@ -476,7 +490,7 @@ ul.three-up {
         display: inline-block;
         padding-top: 15px;
         padding-bottom: 15px;
-        margin: 0px;
+        margin: 0;
     }
 
     /*hide or provide padding for downdown arrow*/
@@ -530,7 +544,7 @@ ul.three-up {
     /*3rd level +*/
     .nav ul.dynamic > li.dynamic-children > ul {
         position: absolute !important;
-        top: 0px !important;
+        top: 0 !important;
         left: 100% !important;
     }
     /*end top nav*/
@@ -538,7 +552,7 @@ ul.three-up {
     /*left nav */
     #sideNavBox {
         float: none;
-        margin: 0px;
+        margin: 0;
         width: auto;
     }
 
@@ -549,3 +563,5 @@ ul.three-up {
     /*end left nav */
 }
 /*end responsive*/
+
+/* Sane BS3 Defaults*/
