@@ -23,7 +23,8 @@ Twitter Bootstrap 3.1.1 adapted to work in SharePoint 2013/ Office 365
 
 ## Features
 
-Carousel - Supports animation in IE9. Bootstrap has dropped support for animation in older browsers like IE9. 
+Carousel - Supports animation in IE9. Bootstrap has dropped support for animation in older browsers like IE9.
+Affix - Bootstraps version does not work in SharePoint. We fixed it.
 
 ## Acknowledgement
 
