@@ -12,8 +12,10 @@
         this.mutationObserver = window.MutationObserver || window.WebKitMutationObserver;
         this.eventListenerSupported = window.addEventListener;
 
-        // Cache the zones
+        // Cache jquery objects
         this.$msWebpartZone = $('.ms-webpart-zone');
+        this.$sideNavBox = $('#sideNavBox');
+        this.$sideNavBoxMsCoreNavigation = $('#sideNavBox .ms-core-navigation');
     }
 
     component.prototype = function () {
@@ -24,13 +26,19 @@
         //
         function init() {
 
-            var self = this;
+            var self = this,
+                $window = $(window);
 
             _triggerSpecialEvents.call(self);
             _fixDropZone.call(self);
             _bindBrowserStyles.call(self);
             _bindTopNav.call(self);
-            _bindBodySpans.call(self);
+            _fixLeftNav.call(self);
+
+            $window.on('debouncedresize', function (event) {
+                _bindBodySpans.call(self);
+            });
+            $window.trigger('debouncedresize');
             _overrideTwitter.call(self);
         }
 
@@ -49,6 +57,44 @@
 
                     return rtn;
                 };
+            }
+
+            // Create a special event to debounce those nasty resize events
+            if (!$.event.special.debouncedresize) {
+                (function () {
+
+                    var $event = $.event,
+                        $special,
+                        resizeTimeout;
+
+                    $special = $event.special.debouncedresize = {
+                        setup: function () {
+                            $(this).on("resize", $special.handler);
+                        },
+                        teardown: function () {
+                            $(this).off("resize", $special.handler);
+                        },
+                        handler: function (event, execAsap) {
+                            // Save the context
+                            var context = this,
+                                args = arguments,
+                                dispatch = function () {
+                                    // set correct event type
+                                    event.type = "debouncedresize";
+                                    $event.dispatch.apply(context, args);
+                                };
+
+                            if (resizeTimeout) {
+                                clearTimeout(resizeTimeout);
+                            }
+
+                            execAsap ?
+                                    dispatch() :
+                                    resizeTimeout = setTimeout(dispatch, $special.threshold);
+                        },
+                        threshold: 150
+                    };
+                })();
             }
         }
 
@@ -92,17 +138,19 @@
         // ie: Design Manager page
 
         function _bindBodySpans() {
-            var $sideNavBox = $('#sideNavBox'),
-                $sideNavBoxMsCoreNavigation;
 
-            if ($sideNavBox.length > 0) {
-                if ($sideNavBox.css('display') == 'none') {
-                    _fullWidth();
+            if (this.$sideNavBox.length > 0) {
+                if (!this.$sideNavBox.is(':visible')) {
+                    _fullWidth.call(this);
                 }
                 else {
-                    $sideNavBoxMsCoreNavigation = $('#sideNavBox .ms-core-navigation');
-                    if ($sideNavBoxMsCoreNavigation.length > 0 && $.trim($sideNavBoxMsCoreNavigation.html()).length < 10) {
-                        _fullWidth();
+                    if (this.$sideNavBoxMsCoreNavigation.length > 0 && $.trim(this.$sideNavBoxMsCoreNavigation.html()).length < 10) {
+                        _fullWidth.call(this);
+                    }
+                    else {
+                        $('#DeltaPlaceHolderMain').parent('[class*="col-"]').css({
+                            'width': ''
+                        });
                     }
                 }
             }
@@ -162,7 +210,7 @@
         function _bindTopNav() {
 
             // grab top nav SP generated list
-            var u = $('[data-role=navigation] ul.root');
+            var u = $('[role=navigation] ul.root');
 
             if (u.length > 0) {
                 // loop through every nav item that has dynamic children
@@ -219,6 +267,14 @@
                     }
                 });
             }
+        }
+
+        // Couple of fixes for overflow that don't in grid
+        //
+        function _fixLeftNav() {
+            $('#sideNavBox').hover(function (e) {
+                $(this).css('overflow-x', '');
+            });
         }
 
 
@@ -314,7 +370,7 @@
             // This is Twitter BS Code modified
 
             Affix.RESET = 'affix affix-top affix-bottom'
-            $.fn.affix.Constructor.prototype.getPinnedOffset = function () {
+            $.fn.affix.Constructor.prototype.getPinnedOffset = function (orgEvent) {
                 if (this.pinnedOffset) return this.pinnedOffset
 
                 var e = $.Event('affix.bs.affix') // SharePoint
@@ -329,38 +385,74 @@
                     var scrollTop = this.$window.scrollTop()
                     var position = this.$element.offset()
                 }
+
+                this.$element.trigger(orgEvent);
+
                 return (this.pinnedOffset = position.top - scrollTop)
             }
             $.fn.affix.Constructor.prototype.checkPosition = function () {
-                if (!this.$element.is(':visible')) return
+
+                if (!this.$element.is(':visible') || this.checkingPosition) return
 
                 var scrollHeight = $(document).height()
                 var scrollTop = this.$window.scrollTop()
                 var position = this.$element.offset()
                 var offset = this.options.offset
-                var offsetTop = offset.top
-                var offsetBottom = offset.bottom
-                var self = this; //sharepoint
+                var offsetTop = typeof this.OffsetTop == 'function' ? this.OffsetTop(this.$element) : offset.top
+                var offsetBottom = typeof this.OffsetBottom == 'function' ? this.OffsetBottom(this.$element) : offset.bottom
+                var fixedHeader = 0;
+
+                if (!this.elementHeight) {
+                    this.elementHeight = this.$element.outerHeight();
+                }
+                else {
+                    if (this.$element.outerHeight() > this.elementHeight) {
+                        this.elementHeight = this.$element.outerHeight();
+                    }
+                }
+
+                if (!this.scrollOffset) {
+                    this.scrollOffset = 0
+                }
 
                 // SharePoint
                 if (typeof $s4workspace != undefined) {
+                    if (this.elementHeight + 95 > $('[data-name=ContentPlaceHolderMain]').height()) {
+                        return;
+                    }
+
+                    fixedHeader = $msDesignerRibbon.height() + parseInt($msDesignerRibbon.css('margin-top'), 10);
                     scrollTop = $s4workspace.scrollTop();
                     scrollHeight = $s4bodyContainer.height()
                     position.top += scrollTop;
                 }
 
                 if (typeof offset != 'object') offsetBottom = offsetTop = offset
-                if (typeof offsetTop == 'function') offsetTop = offset.top(this.$element)
-                if (typeof offsetBottom == 'function') offsetBottom = offset.bottom(this.$element)
-
-                // SharePoint
-                if (typeof $s4workspace != undefined) {
-                    offsetTop += $msDesignerRibbon.height() + parseInt($msDesignerRibbon.css('margin-top'), 10);
+                if (typeof offsetTop == 'function') {
+                    this.OffsetTop = offsetTop;
+                    offsetTop = offset.top(this.$element)
+                }
+                if (typeof offsetBottom == 'function') {
+                    this.OffsetBottom = offsetBottom;
+                    offsetBottom = offset.bottom(this.$element)
                 }
 
+                /*
+                console.log("scrollTop: ", scrollTop, " this.unpin", this.unpin, " <= position.top: ", position.top);
+                console.log("scrollTop + this.unpin: ", scrollTop + this.unpin, " position.top: ", position.top);
+
+                console.log("position.top: ", position.top, " this.elementHeight", this.elementHeight, " this.unpin: ", this.unpin, " fixedHeader: ", fixedHeader, " this.scrollOffset: ", this.scrollOffset);
+                console.log("(position.top + this.elementHeight + this.unpin + fixedHeader) - this.scrollOffset: ", (position.top + this.elementHeight + this.unpin + fixedHeader) - this.scrollOffset, " >= scrollHeight - offsetBottom: ", scrollHeight - offsetBottom);
+
+                console.log("scrollTop: ", scrollTop, " fixedHeader", fixedHeader, " offsetTop: ", offsetTop);
+                console.log("scrollTop + fixedHeader: ", scrollTop + fixedHeader, " <= offsetTop: ", offsetTop);
+                */
+
                 var affix = this.unpin != null && (scrollTop + this.unpin <= position.top) ? false :
-                            offsetBottom != null && (position.top + this.$element.height() + this.unpin >= scrollHeight - offsetBottom) ? 'bottom' :
-                            offsetTop != null && (scrollTop <= offsetTop) ? 'top' : false
+                            offsetBottom != null && ((position.top + this.elementHeight + this.unpin + fixedHeader) - this.scrollOffset >= scrollHeight - offsetBottom) ? 'bottom' :
+                            offsetTop != null && ((scrollTop + fixedHeader) <= offsetTop) ? 'top' : false
+
+                //console.log("affix: ", affix);
 
                 if (this.affixed === affix) return
                 if (this.unpin != null) this.$element.css('top', '')
@@ -373,7 +465,7 @@
                 if (e.isDefaultPrevented()) return
 
                 this.affixed = affix
-                this.unpin = affix == 'bottom' ? this.getPinnedOffset() : null
+                this.unpin = affix == 'bottom' ? this.getPinnedOffset(e) : null
 
                 this.$element
                   .removeClass(Affix.RESET)
@@ -381,10 +473,15 @@
                   .trigger($.Event(affixType.replace('affix', 'affixed')))
 
                 if (affix == 'bottom') {
-                    setTimeout(function () {
-                        self.$element.offset({ top: offsetBottom - (self.$element.outerHeight(true) + self.unpin + 14) })
-                    }, 0);
+                    this.checkingPosition = true;
+                    this.scrollOffset = ((scrollHeight - offsetBottom) - (position.top + this.elementHeight + this.unpin)) + (fixedHeader * 2);
+                    this.$element.offset({ top: this.scrollOffset });
                 }
+                else {
+                    this.scrollOffset = 0;
+                }
+
+                this.checkingPosition = false;
             };
 
             // Trigger a window scroll event on the workspace scroll
