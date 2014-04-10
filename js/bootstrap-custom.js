@@ -9,7 +9,7 @@
 
     var component = function () {
 
-        this.mutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+        this._mutationObserver = window.MutationObserver || window.WebKitMutationObserver;
         this.eventListenerSupported = window.addEventListener;
 
         // Cache jquery objects
@@ -39,6 +39,7 @@
                 _bindBodySpans.call(self);
             });
             $window.trigger('debouncedresize');
+
             _overrideTwitter.call(self);
         }
 
@@ -106,7 +107,7 @@
 
             var self = this;
 
-            if (self.mutationObserver) {
+            if (self._mutationObserver) {
 
                 self.$msWebpartZone.each(function () {
                     var observer = new MutationObserver(function (mutations, observer) {
@@ -126,12 +127,40 @@
         }
 
         function _moveDropZone(obj) {
-            var target = obj.target || obj.srcTarget || obj[0].target;
+            var target = obj.target || obj.srcTarget || obj[0].target,
+                $msDndDropbox = $('#ms-dnd-dropbox');
 
-            $('#ms-dnd-dropbox').css({
-                left: 0,
-                top: 0
-            })
+            if ($msDndDropbox.length > 0) {
+
+                $msDndDropbox.css({
+                    left: 0,
+                    top: 0
+                });
+
+                /*
+                if ($msDndDropbox.get(0) != target) {
+
+                    console.log("mutation: ", SPBS.mutationObserver);
+
+                    if (SPBS.mutationObserver) {
+
+                        var observer = new MutationObserver(function (mutations, observer) {
+                            _moveDropZone(mutations);
+                        });
+
+                        observer.observe($msDndDropbox.get(0), {
+                            subtree: false,
+                            childList: false,
+                            attributes: true
+                        });
+                    }
+                    else {
+                        $msDndDropbox.on("DOMAttrModified", _moveDropZone);
+                    }
+                }
+                */
+            }
+
         }
 
         // Ensure that main content is at 12 columns when there is no side navigation
@@ -275,6 +304,10 @@
             $('#sideNavBox').hover(function (e) {
                 $(this).css('overflow-x', '');
             });
+
+            $('[data-toggle=offcanvas]').click(function () {
+                $('.row-offcanvas').toggleClass('active')
+            });
         }
 
 
@@ -402,6 +435,7 @@
                 var offsetBottom = typeof this.OffsetBottom == 'function' ? this.OffsetBottom(this.$element) : offset.bottom
                 var fixedHeader = 0;
 
+
                 if (!this.elementHeight) {
                     this.elementHeight = this.$element.outerHeight();
                 }
@@ -438,19 +472,21 @@
                 }
 
                 /*
+                console.log('position.left < 100: ', position.left < -10);
                 console.log("scrollTop: ", scrollTop, " this.unpin", this.unpin, " <= position.top: ", position.top);
                 console.log("scrollTop + this.unpin: ", scrollTop + this.unpin, " position.top: ", position.top);
 
                 console.log("position.top: ", position.top, " this.elementHeight", this.elementHeight, " this.unpin: ", this.unpin, " fixedHeader: ", fixedHeader, " this.scrollOffset: ", this.scrollOffset);
-                console.log("(position.top + this.elementHeight + this.unpin + fixedHeader) - this.scrollOffset: ", (position.top + this.elementHeight + this.unpin + fixedHeader) - this.scrollOffset, " >= scrollHeight - offsetBottom: ", scrollHeight - offsetBottom);
+                console.log("(position.top + this.elementHeight + this.unpin + fixedHeader) - this.scrollOffset: ", (position.top + this.elementHeight + this.unpin + fixedHeader) - this.scrollOffset, " >= scrollHeight - offsetBottom: ", scrollHeight - offsetBottom, ' = ', ((position.top + this.elementHeight + this.unpin) - this.scrollOffset >= scrollHeight - offsetBottom));
 
-                console.log("scrollTop: ", scrollTop, " fixedHeader", fixedHeader, " offsetTop: ", offsetTop);
-                console.log("scrollTop + fixedHeader: ", scrollTop + fixedHeader, " <= offsetTop: ", offsetTop);
+                console.log("scrollTop: ", scrollTop,  " offsetTop: ", offsetTop);
+                console.log("scrollTop: ", scrollTop, " <= offsetTop: ", offsetTop, ' = ', (scrollTop <= offsetTop));
                 */
 
-                var affix = this.unpin != null && (scrollTop + this.unpin <= position.top) ? false :
-                            offsetBottom != null && ((position.top + this.elementHeight + this.unpin + fixedHeader) - this.scrollOffset >= scrollHeight - offsetBottom) ? 'bottom' :
-                            offsetTop != null && ((scrollTop + fixedHeader) <= offsetTop) ? 'top' : false
+                var affix = position.left < -10 ? 'top' :
+                            this.unpin != null && (scrollTop + this.unpin <= position.top) ? false :
+                            offsetBottom != null && ((position.top + this.elementHeight + this.unpin) - this.scrollOffset >= scrollHeight - offsetBottom) ? 'bottom' :
+                            offsetTop != null && (scrollTop <= offsetTop) ? 'top' : false
 
                 //console.log("affix: ", affix);
 
@@ -494,10 +530,18 @@
 
         }
 
+
+
         return {
             init: init,
         };
     }();
+
+    Object.defineProperty(component.prototype, "mutationObserver", {
+        get: function () {
+            return this._mutationObserver;
+        }
+    });
 
     //
     // Doc Ready

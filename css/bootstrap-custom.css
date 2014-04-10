@@ -6,9 +6,11 @@
     margin: auto;
     font-weight: normal;
 }
+
 a:hover, a:focus {
     text-decoration: none;
 }
+
 input[type="radio"] {
     margin: 3px 3px 0px 5px;
     padding: initial;
@@ -232,7 +234,7 @@ ul.s4-breadcrumb {
     position: relative;
     display: block;
     padding: 10px 15px;
-    margin-left: 1em;
+    margin-left: 10px;
 }
 
 .navbar-nav li.static > .menu-item {
@@ -276,7 +278,7 @@ ul.s4-breadcrumb {
     background-image: url("/_layouts/15/images/menu-down.gif");
 }
 
-/*dynamic menus should not appear*/
+/* dynamic menus should not appear */
 .nav ul.dynamic {
     display: none !important;
     position: relative !important;
@@ -284,10 +286,17 @@ ul.s4-breadcrumb {
     left: auto !important;
     width: auto !important;
     box-shadow: none;
+    margin-left:25px;
+    margin-right: 45px;
+    margin-bottom: 20px;
 }
 
 .nav li.shown > ul.dynamic {
     display: block !important;
+}
+
+.dynamic-children.shown > a .menu-item-text {
+    font-weight:bold;
 }
 
 .nav ul.dynamic > li {
@@ -309,6 +318,10 @@ ul.s4-breadcrumb {
 /*end top nav */
 
 /*left nav */
+#ctl00_PlaceHolderLeftNavBar_TreeViewNavigationManagerV4 {
+    overflow:hidden;
+}
+
 #sideNavBox[class*="col-"] {
     float: none;
     min-height: 1px;
@@ -317,6 +330,14 @@ ul.s4-breadcrumb {
     margin-left: 0;
     margin-right: 0;
     width: auto;
+}
+#sideNavBox ul.dynamic {
+    width:90%;
+}
+
+.menu-item-text {
+    -ms-word-wrap: normal;
+    word-wrap: normal;
 }
 /*end left nav */
 
@@ -425,9 +446,12 @@ ul.three-up {
     margin-left: 0;
     width: 100%;
 }
-
 .ms-fullscreenmode #sideNavBox,
 .b3-fullscreenmode #sideNavBox {
+    display: none;
+}
+.ms-fullscreenmode [role=menubar],
+.b3-fullscreenmode  [role=menubar] {
     display: none;
 }
 /*end template styles */
@@ -439,8 +463,8 @@ ul.three-up {
 }
 
 
-/*responsive*/
-@media (min-width: 768px) {
+/* responsive - Larger that iPad 2 Landscape */
+@media (min-width: 1025px) {
     /*fix ribbon back to normal*/
     #suiteBar {
         display: table-row;
@@ -488,33 +512,29 @@ ul.three-up {
 
     .navbar-nav li.static > .menu-item {
         display: inline-block;
-        padding-top: 15px;
-        padding-bottom: 15px;
+        padding-top: 10px;
+        padding-bottom: 10px;
         margin: 0;
     }
 
-    /*hide or provide padding for downdown arrow*/
+    /* hide or provide padding for down down arrow */
     .nav .ms-core-listMenu-horizontalBox .dynamic-children.additional-background {
         padding-right: 20px;
         display: inline;
         background-image: url("/_layouts/15/images/menu-down.gif");
     }
-    /*show the edit nav link again for larger devices*/
-    .nav ul.root > li.ms-navedit-editArea {
-        display: inline-block;
-    }
 
-    .nav .ms-navedit-editLinksText {
-        height: 47px;
-        line-height: 1em;
-        padding: 15px 0 15px 10px;
-        display: block;
+    /* we need to override where SP is placing dynamic nav items */
+    .nav ul.dynamic {
+        margin:0;
     }
-    /*we need to override where SP is placing dynamic nav items*/
     .nav ul.static > li.dynamic-children > ul.dynamic {
         position: absolute !important;
-        top: 49px !important;
+        top: 40px !important;
         left: 0 !important;
+    }
+    .dynamic-children.shown > a .menu-item-text {
+        font-weight:normal;
     }
 
     .nav ul.dynamic > li {
@@ -524,7 +544,7 @@ ul.three-up {
     }
 
         .nav ul.dynamic > li:first-child {
-            border-top: 0px transparent none;
+            border-top: 0 transparent none;
         }
 
     .nav li.dynamic-children.hover > ul.dynamic {
@@ -562,6 +582,112 @@ ul.three-up {
         }
     /*end left nav */
 }
+
+@media (min-width: 1240px) {
+    /*show the edit nav link again for larger devices*/
+    .nav ul.root > li.ms-navedit-editArea {
+        display: inline-block;
+    }
+    .nav .ms-navedit-editLinksText {
+        /* height: 47px; */
+        line-height: 1em;
+        padding: 10px 0 10px 10px;
+        display: block;
+    }
+}
+
 /*end responsive*/
 
 /* Sane BS3 Defaults*/
+.affix {
+    left: 0;
+    z-index: 200;
+}
+
+/* Collapse nav at different point */
+@media (max-width: 1024px) {
+    .navbar-header {
+        float: none;
+    }
+    .navbar-toggle {
+        display: block;
+    }
+    .navbar-collapse {
+        border-top: 1px solid transparent;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    .navbar-collapse.collapse {
+        display: none!important;
+    }
+    .navbar-collapse.collapse.in {
+        display: block!important;
+    }
+    .navbar-nav {
+        margin: 7.5px -15px;
+    }
+    .navbar-nav>li {
+        float: none;
+    }
+    .navbar-nav>li>a {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+}
+
+/*
+ * Off Canvas
+ * --------------------------------------------------
+ */
+
+.toggle-offcanvas {
+    display:none;
+}
+
+@media (max-width: 1200px) {
+
+    .toggle-offcanvas {
+        display:block;
+    }
+
+    #s4-workspace {
+        overflow-x: hidden;
+    }
+
+    .row-offcanvas {
+        position: relative;
+        -webkit-transition: all .25s ease-out;
+        -moz-transition: all .25s ease-out;
+        -o-transition: all .25s ease-out;
+        transition: all .25s ease-out;
+    }
+
+    .row-offcanvas-right {
+        right: 0;
+    }
+
+    .row-offcanvas-left {
+        left: 0;
+    }
+
+    .row-offcanvas-right .sidebar-offcanvas {
+        right: -50%; /* 6 columns */
+    }
+
+    .row-offcanvas-left .sidebar-offcanvas {
+        left: -50%; /* 6 columns */
+    }
+
+    .row-offcanvas-right.active {
+        right: 50%; /* 6 columns */
+    }
+
+    .row-offcanvas-left.active {
+        left: 50%; /* 6 columns */
+    }
+
+    .sidebar-offcanvas {
+        position: absolute;
+        top: 0;
+        width: 50%; /* 6 columns */
+    }
+}
