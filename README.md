@@ -23,13 +23,13 @@ Twitter Bootstrap 3.1.1 adapted to work in SharePoint 2013/ Office 365
 
 ## Features
 
-Carousel - Supports animation in IE9. Bootstrap has dropped support for animation in older browsers like IE9.  
+Carousel - Supports animation in IE9. Bootstrap has dropped support for animation in older browsers like IE9. 
+  
+Example:
+ Coming soon  
+ 
 Affix - Bootstraps version does not work in SharePoint. We fixed it.  
-Type: `Boolean`
-Default: true
-
-Whether to spawn task runs in a child process. Setting this option to `false` speeds up the reaction time of the watch (usually 500ms faster for most) and allows subsequent task runs to share the same context. Not spawning task runs can make the watch more prone to failing so please use as needed.
-
+  
 Example:
 ```js
 var $affixNav = $('[data-spy=affix]'),
