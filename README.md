@@ -1,7 +1,7 @@
 sharepoint-bootstrap
 ====================
 
-Twitter Bootstrap 3.1.1 adapted to work in SharePoint 2013/ Office 365
+Twitter Bootstrap 3.2 adapted to work in SharePoint 2013/ Office 365
 
 
 
