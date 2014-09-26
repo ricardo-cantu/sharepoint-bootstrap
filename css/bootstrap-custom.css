@@ -12,7 +12,7 @@ a:hover, a:focus {
 }
 
 input[type="radio"] {
-    margin: 3px 3px 0px 5px;
+    margin: 3px 3px 0 5px;
     padding: initial;
 }
 
@@ -44,18 +44,29 @@ img {
     max-width: 100%; /*for images inside span grid*/
 }
 
-#scriptWPQ2 img,
+.ms-listviewtable img,
 img.ms-webpart-menuArrowImg,
 #applist img,
 .ms-core-menu-icon > img,
 #searchImg, #navImg,
 .ms-toolbar > img,
 .ms-cui-img-cont-float > img,
-span[class^="ms-"] > img {
+span[class^="ms-"] > img,
+.mediaPlayerContainer img,
+.ms-blog-linkCommandImage img {
     width: auto; /*within a span may still need to have width of image not 100% for SP2013 OOTB features/imges*/
     max-width: none;
 }
 
+.ms-descriptiontext.ms-inputformdescription {
+    white-space:normal;
+}
+.ms-descriptiontext.ms-inputformdescription > table td {
+    white-space:nowrap;
+}
+.UserSectionHead {
+    white-space:nowrap;
+}
 .ms-siteactions-imgspan {
     float: none;
     margin: 0;
@@ -71,12 +82,6 @@ select, input[type="file"] {
     line-height: 20px;
 }
 
-label {
-    display: inline-block;
-    margin-bottom: 0;
-    font-weight: normal;
-}
-
 .navbar-toggle {
     min-width: 0;
 }
@@ -85,10 +90,43 @@ a:focus {
     outline: none;
 }
 
+a.btn:visited {
+    color:#fff;
+}
+a.btn-default:visited {
+    color:#333;
+}
+
 button::-moz-focus-inner {
     border: 0;
 }
+
+.ms-authoringcontrols label {
+    display: inline-block;
+    margin-bottom: 0;
+    font-weight: normal;
+}
 /*end bootstrap resets*/
+
+/* Prevent web parts from leaking out of it's container 
+    during editing */
+.InDesignMode .ms-WPBody.ms-WPBorder.ms-wpContentDivSpace {
+    overflow: hidden;
+}
+
+/* Modal */
+.modal input[type=button],
+.modal input[type=reset],
+.modal input[type=submit],
+.modal button {
+    min-width:0;
+}
+
+/* Carousel */
+.carousel-inner > .item {
+    padding: 0;
+    clear: none;
+}
 
 /*SharePoint overrides some B3 classes, reset back*/
 .container {
@@ -123,7 +161,7 @@ button::-moz-focus-inner {
 
 #s4-ribbonrow [class*="col-"] {
     float: none;
-    margin-left: 0px;
+    margin-left: 0;
 }
 
 #pageStatusBar[class], .ms-status-msg {
@@ -226,7 +264,6 @@ ul.s4-breadcrumb {
 .navbar-default .navbar-nav li.static > .menu-item.selected,
 .navbar-default .navbar-nav li.static > .menu-item.selected:hover,
 .navbar-default .navbar-nav li.static > .menu-item.selected:focus {
-    color: #555;
     background-color: #e7e7e7;
 }
 
@@ -271,7 +308,7 @@ ul.s4-breadcrumb {
 .nav ul.root > li.ms-navedit-editArea {
     display: none;
 }
-/*hide or provide padding for downdown arrow*/
+/*hide or provide padding for down arrow*/
 .nav .ms-core-listMenu-horizontalBox .dynamic-children.additional-background {
     width: 100%;
     display: block;
@@ -289,14 +326,11 @@ ul.s4-breadcrumb {
     margin-left:25px;
     margin-right: 45px;
     margin-bottom: 20px;
+    z-index:500;
 }
 
 .nav li.shown > ul.dynamic {
     display: block !important;
-}
-
-.dynamic-children.shown > a .menu-item-text {
-    font-weight:bold;
 }
 
 .nav ul.dynamic > li {
@@ -336,15 +370,20 @@ ul.s4-breadcrumb {
 }
 
 .menu-item-text {
+    font-family: 'Segoe UI','Open Sans',Verdana,Arial,Helvetica,sans-serif;
+    letter-spacing: .02em;
     -ms-word-wrap: normal;
     word-wrap: normal;
+    color: #000;
+    font-weight: 700;
+    font-size: 1.0803em;
 }
 /*end left nav */
 
 /* main content areas */
 .ms-vl-apptitleouter > a {
-    -ms-word-break: break-all;
-    word-break: break-all;
+    -ms-word-break: normal;
+    word-break: normal;
 }
 
 div.table {
@@ -363,7 +402,12 @@ div.table {
     display: block;
 }
 
-/*site settings*/
+/* App settings */
+td.ms-authoringcontrols > span {
+    white-space: nowrap;
+}
+
+/* site settings */
 /*Settings page - Add app page*/
 #idStorefrontManagementLeftNavBar.ms-core-sideNavBox-removeLeftMargin {
     margin-left: 0;
@@ -411,11 +455,41 @@ a.ms-storefront-selectanchor, a.ms-storefront-selectanchor:link, a.ms-storefront
     line-height: 20px;
 }
 
+.ms-webpart-titleText {
+    margin-top:0;
+    margin-bottom:0;
+    line-height:normal;
+}
+
 .ms-ToolPaneBody label {
     display: inline-block;
     margin-bottom: 0;
 }
 /*end web part properties*/
+
+
+/* Blog */
+.ms-blog-postList,
+.ms-blog-MainArea {
+    max-width: none;
+}
+
+@-moz-document url-prefix() {
+    .ms-blog-postBody img {
+        max-width: 100%;
+        width: 100%;
+    }
+}
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+    .ms-blog-postBody img {
+        max-width: 100%;
+        width: 100%;
+    }
+}
+
+
+/* End Blog */
+
 
 /*Gallery Grid in Banner/Homepage2*/
 ul.three-up {
@@ -533,9 +607,6 @@ ul.three-up {
         top: 40px !important;
         left: 0 !important;
     }
-    .dynamic-children.shown > a .menu-item-text {
-        font-weight:normal;
-    }
 
     .nav ul.dynamic > li {
         min-width: 150px;
@@ -552,10 +623,8 @@ ul.three-up {
     }
 
     .nav li.dynamic > .menu-item {
-        height: 34px;
-        line-height: 1em;
+        line-height: 7px;
         margin: 0;
-        padding: 9px 15px;
     }
 
     .nav .ms-core-listMenu-horizontalBox .dynamic .dynamic-children.additional-background {
@@ -599,7 +668,7 @@ ul.three-up {
 /*end responsive*/
 
 /* Sane BS3 Defaults*/
-.affix {
+[data-name=QuickLaunch] .affix {
     left: 0;
     z-index: 200;
 }
@@ -625,9 +694,12 @@ ul.three-up {
     .navbar-nav {
         margin: 7.5px -15px;
     }
+    /*
+        Makes ipad nav weird
     .navbar-nav>li {
         float: none;
     }
+        */
     .navbar-nav>li>a {
         padding-top: 10px;
         padding-bottom: 10px;
@@ -651,6 +723,8 @@ ul.three-up {
 
     #s4-workspace {
         overflow-x: hidden;
+        overflow-y: scroll;
+        -webkit-overflow-scrolling: touch;
     }
 
     .row-offcanvas {
@@ -673,7 +747,10 @@ ul.three-up {
         right: -50%; /* 6 columns */
     }
 
-    .row-offcanvas-left .sidebar-offcanvas {
+    .row-offcanvas-left:not(.active) .sidebar-offcanvas {
+        left: -1000px; /* hide */
+    }
+    .row-offcanvas-left.active .sidebar-offcanvas {
         left: -50%; /* 6 columns */
     }
 
@@ -689,5 +766,21 @@ ul.three-up {
         position: absolute;
         top: 0;
         width: 50%; /* 6 columns */
+        margin-left:15px;
     }
+}
+
+/* Keep stuff from leaking out of div */
+.jumbotron {
+    overflow: auto;
+}
+
+label+.radio, label+.checkbox {
+    margin-top: 0;
+}
+
+/* extras */
+.col-centered {
+    float: none;
+    margin: 0 auto;
 }

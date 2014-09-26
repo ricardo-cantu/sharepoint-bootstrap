@@ -3,9 +3,8 @@
 //
 //
 //
-
+/* global FixRibbonAndWorkspaceDimensions,SPBS */
 (function (window, $) {
-    "use strict";
 
     var component = function () {
 
@@ -16,7 +15,7 @@
         this.$msWebpartZone = $('.ms-webpart-zone');
         this.$sideNavBox = $('#sideNavBox');
         this.$sideNavBoxMsCoreNavigation = $('#sideNavBox .ms-core-navigation');
-    }
+    };
 
     component.prototype = function () {
 
@@ -34,8 +33,9 @@
             _bindBrowserStyles.call(self);
             _bindTopNav.call(self);
             _fixLeftNav.call(self);
+            _fixImg.call(self);
 
-            $window.on('debouncedresize', function (event) {
+            $window.on('debouncedresize', function () {
                 _bindBodySpans.call(self);
             });
             $window.trigger('debouncedresize');
@@ -110,7 +110,7 @@
             if (self._mutationObserver) {
 
                 self.$msWebpartZone.each(function () {
-                    var observer = new MutationObserver(function (mutations, observer) {
+                    var observer = new MutationObserver(function (mutations) {
                         _moveDropZone(mutations);
                     });
 
@@ -120,8 +120,7 @@
                         attributes: false
                     });
                 });
-            }
-            else {
+            } else {
                 self.$msWebpartZone.on("DOMSubtreeModified", _moveDropZone);
             }
         }
@@ -171,12 +170,11 @@
             if (this.$sideNavBox.length > 0) {
                 if (!this.$sideNavBox.is(':visible')) {
                     _fullWidth.call(this);
-                }
-                else {
+                } else {
                     if (this.$sideNavBoxMsCoreNavigation.length > 0 && $.trim(this.$sideNavBoxMsCoreNavigation.html()).length < 10) {
+                        this.$sideNavBox.hide();
                         _fullWidth.call(this);
-                    }
-                    else {
+                    } else {
                         $('#DeltaPlaceHolderMain').parent('[class*="col-"]').css({
                             'width': ''
                         });
@@ -193,7 +191,6 @@
             });
         }
 
-
         // triggered when a nav link is clicked
         // l = the .menu-item, either an anchor or span(header)
         function _DropTopNav(l, a) {
@@ -205,17 +202,15 @@
                 p = l.parent();
                 if (u.length > 0) {
                     // if the sub menu is hidden, then show or visa-versa
-                    if (p.hasClass('shown') || (a == 'o')) {
+                    if (p.hasClass('shown') || (a === 'o')) {
                         p.removeClass('shown');
-                    }
-                    else {
+                    } else {
                         p.addClass('shown');
                     }
                 }
             }
         }
         // end top nav
-
 
         // triggered when a nav link is hovered
         // l = the li that has been hovered
@@ -227,12 +222,12 @@
                 $m = $('.navbar-toggle');
                 if ($m.length > 0) {
                     // only down dropdown on hover if not mobile nav view
-                    if ($m.css('display') == 'none')
+                    if ($m.css('display') === 'none') {
                         _DropTopNav(l.children('.menu-item').eq(0), a);
+                    }
                 }
             }
         }
-
 
         // Make top navigation responsive / touch friendly
         // Replaces the hover event for element that have dynamic children
@@ -258,25 +253,24 @@
                     );
 
                     if (a.is('span')) {
-                        a.on('click', function (e) {
+                        a.on('click', function () {
                             _DropTopNav($(this));
                             return false;
                         });
 
-                        s.on('click', function (e) {
+                        s.on('click', function () {
                             _DropTopNav($(this).parent());
                             return false;
                         });
-                    }
-                    else {
+                    } else {
                         a.on('click', function (e) {
                             // if click occurred inside of a text span, then redirect
                             if (((e.pageX >= t.offset().left) && (e.pageX <= (t.offset().left + t.outerWidth(true)))) &&
                                 ((e.pageY >= t.offset().top) && (e.pageY <= (t.offset().top + t.outerHeight(true))))) {
                                 return true;
-                            }
-                            else
+                            } else {
                                 _DropTopNav($(this).eq(0));
+                            }
                             return false;
                         });
 
@@ -286,13 +280,11 @@
                             if (((e.pageX >= t.offset().left) && (e.pageX <= (t.offset().left + t.outerWidth(true)))) &&
                                 ((e.pageY >= t.offset().top) && (e.pageY <= (t.offset().top + t.outerHeight(true))))) {
                                 window.location.href = $(this).parent('a').eq(0).attr('href');
-                            }
-                            else {
+                            } else {
                                 _DropTopNav($(this).parent('a').eq(0));
                             }
                             return false;
                         });
-
                     }
                 });
             }
@@ -301,15 +293,17 @@
         // Couple of fixes for overflow that don't in grid
         //
         function _fixLeftNav() {
-            $('#sideNavBox').hover(function (e) {
-                $(this).css('overflow-x', '');
-            });
 
-            $('[data-toggle=offcanvas]').click(function () {
-                $('.row-offcanvas').toggleClass('active')
-            });
+            if (this.$sideNavBox.length > 0) {
+                $('#sideNavBox').hover(function () {
+                    $(this).css('overflow-x', '');
+                });
+
+                $('[data-toggle=offcanvas]').click(function () {
+                    $('.row-offcanvas').toggleClass('active');
+                });
+            }
         }
-
 
         // specific browsers may require specific fixes
         function _bindBrowserStyles() {
@@ -342,11 +336,15 @@
                     $next = this.$element.find('.item')[fallback]()
                 }
 
-                if ($next.hasClass('active')) return this.sliding = false
+                if ($next.hasClass('active')) return (this.sliding = false)
 
-                var e = $.Event('slide.bs.carousel', { relatedTarget: $next[0], direction: direction })
-                this.$element.trigger(e)
-                if (e.isDefaultPrevented()) return
+                var relatedTarget = $next[0]
+                var slideEvent = $.Event('slide.bs.carousel', {
+                    relatedTarget: relatedTarget,
+                    direction: direction
+                })
+                this.$element.trigger(slideEvent)
+                if (slideEvent.isDefaultPrevented()) return
 
                 this.sliding = true
 
@@ -354,39 +352,40 @@
 
                 if (this.$indicators.length) {
                     this.$indicators.find('.active').removeClass('active')
-                    this.$element.one('slid.bs.carousel', function () {
-                        var $nextIndicator = $(that.$indicators.children()[that.getActiveIndex()])
-                        $nextIndicator && $nextIndicator.addClass('active')
-                    })
+                    var $nextIndicator = $(this.$indicators.children()[this.getItemIndex($next)])
+                    $nextIndicator && $nextIndicator.addClass('active')
                 }
 
+                var slidEvent = $.Event('slid.bs.carousel', { relatedTarget: relatedTarget, direction: direction }) // yes, "slid"
                 if ($.support.transition && this.$element.hasClass('slide')) {
                     $next.addClass(type)
                     $next[0].offsetWidth // force reflow
                     $active.addClass(direction)
                     $next.addClass(direction)
                     $active
-                      .one($.support.transition.end, function () {
+                      .one('bsTransitionEnd', function () {
                           $next.removeClass([type, direction].join(' ')).addClass('active')
                           $active.removeClass(['active', direction].join(' '))
                           that.sliding = false
-                          setTimeout(function () { that.$element.trigger('slid.bs.carousel') }, 0)
+                          setTimeout(function () {
+                              that.$element.trigger(slidEvent)
+                          }, 0)
                       })
                       .emulateTransitionEnd($active.css('transition-duration').slice(0, -1) * 1000)
                 } else if (this.$element.hasClass('slide')) {
                     $active.animate({ left: (direction == 'right' ? '100%' : '-100%') }, 600, function () {
-                        $active.removeClass('active')
-                        that.sliding = false
-                        setTimeout(function () { that.$element.trigger('slid.bs.carousel') }, 0)
-                    })
+                        $active.removeClass('active');
+                        that.sliding = false;
+                        setTimeout(function () { that.$element.trigger(slidEvent); }, 0);
+                    });
                     $next.addClass(type).css({ left: (direction == 'right' ? '-100%' : '100%') }).animate({ left: 0 }, 600, function () {
-                        $next.removeClass(type).addClass('active')
-                    })
+                        $next.removeClass(type).addClass('active');
+                    });
                 } else {
                     $active.removeClass('active')
                     $next.addClass('active')
                     this.sliding = false
-                    this.$element.trigger('slid.bs.carousel')
+                    this.$element.trigger(slidEvent)
                 }
 
                 isCycling && this.cycle()
@@ -402,77 +401,76 @@
             //
             // This is Twitter BS Code modified
 
-            Affix.RESET = 'affix affix-top affix-bottom'
+            Affix.RESET = 'affix affix-top affix-bottom';
             $.fn.affix.Constructor.prototype.getPinnedOffset = function (orgEvent) {
-                if (this.pinnedOffset) return this.pinnedOffset
+                if (this.pinnedOffset) { return this.pinnedOffset; }
 
-                var e = $.Event('affix.bs.affix') // SharePoint
-                this.$element.removeClass(Affix.RESET).addClass('affix').trigger(e) // SharePoint
+                var e = $.Event('affix.bs.affix'); // SharePoint
+                this.$element.removeClass(Affix.RESET).addClass('affix').trigger(e); // SharePoint
 
                 // SharePoint
-                if (typeof $s4workspace != undefined) {
-                    var scrollTop = $s4workspace.scrollTop();
-                    var position = { top: this.$element.offset().top + scrollTop };
-                }
-                else {
-                    var scrollTop = this.$window.scrollTop()
-                    var position = this.$element.offset()
+                var scrollTop, position;
+                if (typeof $s4workspace !== 'undefined') {
+                    scrollTop = $s4workspace.scrollTop();
+                    position = { top: this.$element.offset().top + scrollTop };
+                } else {
+                    scrollTop = $(window).scrollTop();
+                    position = this.$element.offset();
                 }
 
                 this.$element.trigger(orgEvent);
 
-                return (this.pinnedOffset = position.top - scrollTop)
-            }
+                return (this.pinnedOffset = position.top - scrollTop);
+            };
             $.fn.affix.Constructor.prototype.checkPosition = function () {
 
-                if (!this.$element.is(':visible') || this.checkingPosition) return
+                //console.log("checkPosition");
 
-                var scrollHeight = $(document).height()
-                var scrollTop = this.$window.scrollTop()
-                var position = this.$element.offset()
-                var offset = this.options.offset
-                var offsetTop = typeof this.OffsetTop == 'function' ? this.OffsetTop(this.$element) : offset.top
-                var offsetBottom = typeof this.OffsetBottom == 'function' ? this.OffsetBottom(this.$element) : offset.bottom
+                if (!this.$element.is(':visible') || this.checkingPosition)
+                {
+                    return;
+                }
+
+                var scrollHeight = $(document).height();
+                var scrollTop = $(window).scrollTop();
+                var position = this.$element.offset();
+                var offset = this.options.offset;
+                var offsetTop = offset.top;
+                var offsetBottom = offset.bottom;
                 var fixedHeader = 0;
-
 
                 if (!this.elementHeight) {
                     this.elementHeight = this.$element.outerHeight();
-                }
-                else {
+                } else {
                     if (this.$element.outerHeight() > this.elementHeight) {
                         this.elementHeight = this.$element.outerHeight();
                     }
                 }
 
                 if (!this.scrollOffset) {
-                    this.scrollOffset = 0
+                    this.scrollOffset = 0;
                 }
 
                 // SharePoint
-                if (typeof $s4workspace != undefined) {
-                    if (this.elementHeight + 95 > $('[data-name=ContentPlaceHolderMain]').height()) {
-                        return;
-                    }
-
+                if (typeof $s4workspace !== 'undefined') {
                     fixedHeader = $msDesignerRibbon.height() + parseInt($msDesignerRibbon.css('margin-top'), 10);
                     scrollTop = $s4workspace.scrollTop();
-                    scrollHeight = $s4bodyContainer.height()
+                    scrollHeight = $s4bodyContainer.height();
                     position.top += scrollTop;
                 }
 
-                if (typeof offset != 'object') offsetBottom = offsetTop = offset
+                if (typeof offset != 'object') { offsetBottom = offsetTop = offset; }
+
                 if (typeof offsetTop == 'function') {
-                    this.OffsetTop = offsetTop;
-                    offsetTop = offset.top(this.$element)
+                    offsetTop = offset.top(this.$element);
                 }
                 if (typeof offsetBottom == 'function') {
-                    this.OffsetBottom = offsetBottom;
-                    offsetBottom = offset.bottom(this.$element)
+                    offsetBottom = offset.bottom(this.$element);
                 }
 
                 /*
-                console.log('position.left < 100: ', position.left < -10);
+                console.log('parent: ', this.$element.parent().offset().left);
+                console.log('position.left: ', position.left);
                 console.log("scrollTop: ", scrollTop, " this.unpin", this.unpin, " <= position.top: ", position.top);
                 console.log("scrollTop + this.unpin: ", scrollTop + this.unpin, " position.top: ", position.top);
 
@@ -483,37 +481,36 @@
                 console.log("scrollTop: ", scrollTop, " <= offsetTop: ", offsetTop, ' = ', (scrollTop <= offsetTop));
                 */
 
-                var affix = position.left < -10 ? 'top' :
+                var affix = (this.$element.parent().offset().left < -10 || this.$element.closest('.row-offcanvas.active').length > 0 || this.elementHeight + 95 > $('[data-name=ContentPlaceHolderMain]').height()) ? 'top' :
                             this.unpin != null && (scrollTop + this.unpin <= position.top) ? false :
                             offsetBottom != null && ((position.top + this.elementHeight + this.unpin) - this.scrollOffset >= scrollHeight - offsetBottom) ? 'bottom' :
-                            offsetTop != null && (scrollTop <= offsetTop) ? 'top' : false
+                            offsetTop != null && (scrollTop <= offsetTop) ? 'top' : false;
 
                 //console.log("affix: ", affix);
 
-                if (this.affixed === affix) return
-                if (this.unpin != null) this.$element.css('top', '')
+                if (this.affixed === affix) { return; }
+                if (this.unpin != null) { this.$element.css('top', ''); }
 
-                var affixType = 'affix' + (affix ? '-' + affix : '')
-                var e = $.Event(affixType + '.bs.affix')
+                var affixType = 'affix' + (affix ? '-' + affix : '');
+                var e = $.Event(affixType + '.bs.affix');
 
-                this.$element.trigger(e)
+                this.$element.trigger(e);
 
-                if (e.isDefaultPrevented()) return
+                if (e.isDefaultPrevented()) { return; }
 
-                this.affixed = affix
-                this.unpin = affix == 'bottom' ? this.getPinnedOffset(e) : null
+                this.affixed = affix;
+                this.unpin = affix == 'bottom' ? this.getPinnedOffset(e) : null;
 
                 this.$element
                   .removeClass(Affix.RESET)
                   .addClass(affixType)
-                  .trigger($.Event(affixType.replace('affix', 'affixed')))
+                  .trigger($.Event(affixType.replace('affix', 'affixed')));
 
                 if (affix == 'bottom') {
                     this.checkingPosition = true;
                     this.scrollOffset = ((scrollHeight - offsetBottom) - (position.top + this.elementHeight + this.unpin)) + (fixedHeader * 2);
                     this.$element.offset({ top: this.scrollOffset });
-                }
-                else {
+                } else {
                     this.scrollOffset = 0;
                 }
 
@@ -521,16 +518,30 @@
             };
 
             // Trigger a window scroll event on the workspace scroll
-            $s4workspace.on('scroll', function (e) {
+            $s4workspace.on('scroll', function () {
                 $(window).triggerHandler("scroll.bs.affix.data-api");
             });
-            $(document).on('FixRibbonAndWorkspaceDimensions', function (e) {
+            $(document).on('FixRibbonAndWorkspaceDimensions', function () {
                 $(window).triggerHandler("scroll.bs.affix.data-api");
             });
 
         }
 
+        // Fix images in the blog if IE
+        //
+        function _fixImg() {
 
+            var ua = window.navigator.userAgent,
+                msie = ua.indexOf("MSIE ");
+
+            if (msie > 0 || !!navigator.userAgent.match(/Trident\//)) {
+                $('.ms-blog-postBody img').each(function () {
+                    $(this).load(function () {
+                        $(this).css('max-width', this.naturalWidth);
+                    });
+                });
+            }
+        }
 
         return {
             init: init,
