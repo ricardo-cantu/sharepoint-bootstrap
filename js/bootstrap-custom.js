@@ -468,18 +468,16 @@
                     offsetBottom = offset.bottom(this.$element);
                 }
 
-                /*
-                console.log('parent: ', this.$element.parent().offset().left);
-                console.log('position.left: ', position.left);
-                console.log("scrollTop: ", scrollTop, " this.unpin", this.unpin, " <= position.top: ", position.top);
-                console.log("scrollTop + this.unpin: ", scrollTop + this.unpin, " position.top: ", position.top);
+                //console.log('parent: ', this.$element.parent().offset().left);
+                //console.log('position.left: ', position.left);
+                //console.log("scrollTop: ", scrollTop, " this.unpin", this.unpin, " <= position.top: ", position.top);
+                //console.log("scrollTop + this.unpin: ", scrollTop + this.unpin, " position.top: ", position.top);
 
-                console.log("position.top: ", position.top, " this.elementHeight", this.elementHeight, " this.unpin: ", this.unpin, " fixedHeader: ", fixedHeader, " this.scrollOffset: ", this.scrollOffset);
-                console.log("(position.top + this.elementHeight + this.unpin + fixedHeader) - this.scrollOffset: ", (position.top + this.elementHeight + this.unpin + fixedHeader) - this.scrollOffset, " >= scrollHeight - offsetBottom: ", scrollHeight - offsetBottom, ' = ', ((position.top + this.elementHeight + this.unpin) - this.scrollOffset >= scrollHeight - offsetBottom));
+                //console.log("position.top: ", position.top, " this.elementHeight", this.elementHeight, " this.unpin: ", this.unpin, " fixedHeader: ", fixedHeader, " this.scrollOffset: ", this.scrollOffset);
+                //console.log("(position.top + this.elementHeight + this.unpin + fixedHeader) - this.scrollOffset: ", (position.top + this.elementHeight + this.unpin + fixedHeader) - this.scrollOffset, " >= scrollHeight - offsetBottom: ", scrollHeight - offsetBottom, ' = ', ((position.top + this.elementHeight + this.unpin) - this.scrollOffset >= scrollHeight - offsetBottom));
 
-                console.log("scrollTop: ", scrollTop,  " offsetTop: ", offsetTop);
-                console.log("scrollTop: ", scrollTop, " <= offsetTop: ", offsetTop, ' = ', (scrollTop <= offsetTop));
-                */
+                //console.log("scrollTop: ", scrollTop,  " offsetTop: ", offsetTop);
+                //console.log("scrollTop: ", scrollTop, " <= offsetTop: ", offsetTop, ' = ', (scrollTop <= offsetTop));
 
                 var affix = (this.$element.parent().offset().left < -10 || this.$element.closest('.row-offcanvas.active').length > 0 || this.elementHeight + 95 > $('[data-name=ContentPlaceHolderMain]').height()) ? 'top' :
                             this.unpin != null && (scrollTop + this.unpin <= position.top) ? false :

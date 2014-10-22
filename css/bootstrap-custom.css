@@ -356,19 +356,6 @@ ul.s4-breadcrumb {
     overflow:hidden;
 }
 
-#sideNavBox[class*="col-"] {
-    float: none;
-    min-height: 1px;
-    padding-left: 15px;
-    padding-right: 15px;
-    margin-left: 0;
-    margin-right: 0;
-    width: auto;
-}
-#sideNavBox ul.dynamic {
-    width:90%;
-}
-
 .menu-item-text {
     font-family: 'Segoe UI','Open Sans',Verdana,Arial,Helvetica,sans-serif;
     letter-spacing: .02em;
@@ -637,19 +624,6 @@ ul.three-up {
         left: 100% !important;
     }
     /*end top nav*/
-
-    /*left nav */
-    #sideNavBox {
-        float: none;
-        margin: 0;
-        width: auto;
-    }
-
-        #sideNavBox[class*="col-"] {
-            float: left;
-            width: 25%;
-        }
-    /*end left nav */
 }
 
 @media (min-width: 1240px) {
